@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import './App.css';
 
+
 const products = [
   {
     id: 1,
@@ -56,15 +57,23 @@ const products = [
     color: 'Black',
     emoji: '◉',
     image: 'https://images.unsplash.com/photo-1493106641515-6b5631de4bb9?auto=format&fit=crop&w=800&q=85'
-  }
+  },
+   {
+  id: 7,
+  name: "5V DC Motor",
+  price: 15,
+  image: "https://media.istockphoto.com/id/958669244/photo/electromotor.jpg?s=1024x1024&w=is&k=20&c=t2jFJontbiM9b-PQ9BRa2APnyIs-jejRYHKWYFqwwXw=",
+  description: "Compact 5V DC motor for DIY electronics and robotics."
+}
 ];
 
-const categories = ['All', 'T-Shirts', 'Graphic Tees', 'Mugs'];
+
+const categories = ['All', 'T-Shirts', 'Graphic Tees', 'Mugs', 'Motors'];
 
 function App() {
   const [category, setCategory] = useState('All');
   const [cart, setCart] = useState([]);
-  const [cartOpen, setCartOpen] = useState(false);
+  const [cartOpen,setCartOpen] = useState(false);
   const [search, setSearch] = useState('');
 
   const filtered = products.filter((product) => {
@@ -73,125 +82,96 @@ function App() {
     return matchesCategory && matchesSearch;
   });
 
-  const addToCart = (product) => {
-    setCart((current) => {
-      const existing = current.find((item) => item.id === product.id);
 
-      if (existing) {
-        return current.map((item) =>
-          item.id === product.id
-            ? { ...item, quantity: item.quantity + 1 }
-            : item
-        );
-      }
+const addToCart = (product) => {
+  setCart((current) => {
+    const existing = current.find((item) => item.id === product.id);
 
-      return [...current, { ...product, quantity: 1 }];
-    });
+    if (existing) {
+      return current.map((item) =>
+        item.id === product.id
+          ? { ...item, quantity: item.quantity + 1 }
+          : item
+      );
+    }
 
-    setCartOpen(true);
-  };
+    return [...current, { ...product, quantity: 1 }];
+  });
 
-  const changeQuantity = (productId, amount) => {
-    setCart((current) =>
-      current
-        .map((item) =>
-          item.id === productId
-            ? { ...item, quantity: item.quantity + amount }
-            : item
-        )
-        .filter((item) => item.quantity > 0)
-    );
-  };
+  setCartOpen(true);
+};
 
-  const removeFromCart = (productId) => {
-    setCart((current) => current.filter((item) => item.id !== productId));
-  };
+const changeQuantity = (productId, amount) => {
+  setCart((current) =>
+    current
+      .map((item) =>
+        item.id === productId
+          ? { ...item, quantity: item.quantity + amount }
+          : item
+      )
+      .filter((item) => item.quantity > 0)
+  );
+};
 
-  const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
-  const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+const removeFromCart = (productId) => {
+  setCart((current) =>
+    current.filter((item) => item.id !== productId)
+  );
+};
+
+const cartCount = cart.reduce(
+  (sum, item) => sum + item.quantity,
+  0
+);
+
+const total = cart.reduce(
+  (sum, item) => sum + item.price * item.quantity,
+  0
+);
+
 
   return (
     <div className="site">
       <div className="announcement">INTRODUCING THE ANDEX STUDIO COLLECTION — SHOP THE DROP</div>
 
       <header className="header">
-        <a className="logo" href="#home">
-          ANDEX<span>®</span>
-          <small>STUDIOS</small>
-        </a>
+        <a className="logo" href="#home">ANDEX<span>®</span><small>STUDIOS</small></a>
         <nav>
           <a href="#shop">Shop</a>
           <a href="#story">Our Story</a>
         </nav>
-        <a className="cart-link" href="#shop">
-          Bag ({cartCount})
-        </a>
+        <a className="cart-link" href="#shop">Bag ({cart.length})</a>
       </header>
 
       <main>
         <section className="hero" id="home">
           <div className="hero-copy">
             <p className="eyebrow">INDEPENDENT DESIGN STUDIO · EST. 2026</p>
-            <h1>
-              MADE TO
-              <br />
-              STAND <em>OUT.</em>
-            </h1>
-            <p className="hero-text">
-              Everyday essentials. Unexpected graphics. Designed for wherever life takes you.
-            </p>
-            <a className="button dark-button" href="#shop">
-              SHOP THE COLLECTION ↗
-            </a>
+            <h1>MADE TO<br />STAND <em>OUT.</em></h1>
+            <p className="hero-text">Everyday essentials. Unexpected graphics. Designed for wherever life takes you.</p>
+            <a className="button dark-button" href="#shop">SHOP THE COLLECTION ↗</a>
           </div>
-
           <div className="hero-art">
             <div className="art-circle"></div>
-            <div className="art-word">
-              A<span>/</span>X
-            </div>
-            <div className="art-caption">
-              OBJECTS FOR EVERYDAY LIFE
-              <br />
-              ANDEX STUDIOS · VOL. 001
-            </div>
-            <div className="art-stamp">
-              DESIGNED
-              <br />
-              DIFFERENT.
-            </div>
+            <div className="art-word">A<span>/</span>X</div>
+            <div className="art-caption">OBJECTS FOR EVERYDAY LIFE<br />ANDEX STUDIOS · VOL. 001</div>
+            <div className="art-stamp">DESIGNED<br />DIFFERENT.</div>
           </div>
         </section>
 
         <section className="shop-section" id="shop">
           <div className="section-heading">
-            <div>
-              <p className="eyebrow">THE CURRENT DROP</p>
-              <h2>
-                Shop the collection<span>.</span>
-              </h2>
-            </div>
+            <div><p className="eyebrow">THE CURRENT DROP</p><h2>Shop the collection<span>.</span></h2></div>
             <span className="item-count">{filtered.length} ITEMS</span>
           </div>
 
           <div className="shop-tools">
             <div className="filters">
               {categories.map((item) => (
-                <button
-                  key={item}
-                  className={category === item ? 'filter active' : 'filter'}
-                  onClick={() => setCategory(item)}
-                >
-                  {item}
-                </button>
+                <button key={item} className={category === item ? 'filter active' : 'filter'} onClick={() => setCategory(item)}>{item}</button>
               ))}
             </div>
-            <input
-              aria-label="Search products"
-              placeholder="Search pieces..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
+            <input aria-label="Search products" placeholder="Search pieces..." value={search} onChange={(e) => setSearch(e.target.value)} />
           </div>
 
           <div className="product-grid">
@@ -240,7 +220,7 @@ function App() {
             less ordinary. Thoughtful pieces, bold graphics, and room to make them your own.
           </p>
           <a href="#shop" className="text-link">
-            FIND YOUR NEXT FAVORITE ↗
+            SHOP THE COLLECTION ↗
           </a>
         </section>
 
