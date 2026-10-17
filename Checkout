@@ -1,0 +1,66 @@
+import uuid
+from typing import List, Dict
+
+class Item:
+    def __init__(self, item_id: str, name: str, price: float):
+        self.item_id = item_id
+        self.name = name
+        self.price = price
+
+class ShoppingCart:
+    def __init__(self):
+        self.items: Dict[str, Dict] = {}
+
+    def add_item(self, item: Item, quantity: int = 1):
+        if item.item_id in self.items:
+            self.items[item.item_id]['quantity'] += quantity
+        else:
+            self.items[item.item_id] = {'item': item, 'quantity': quantity}
+        print(f"Added {quantity}x '{item.name}' to the cart.")
+
+    def calculate_subtotal(self) -> float:
+        return sum(details['item'].price * details['quantity'] for details in self.items.values())
+
+class CheckoutProcessor:
+    TAX_RATE = 0.08  # 8% Sales Tax
+
+    @staticmethod
+    def process_checkout(cart: ShoppingCart, payment_method: str) -> Dict:
+        if not cart.items:
+            raise ValueError("Cannot checkout an empty cart.")
+        
+        subtotal = cart.calculate_subtotal()
+        tax = round(subtotal * CheckoutProcessor.TAX_RATE, 2)
+        total = round(subtotal + tax, 2)
+        order_id = str(uuid.uuid4())[:8].upper()
+
+        print(f"\n--- Processing Order #{order_id} ---")
+        print(f"Subtotal: ${subtotal:.2f}")
+        print(f"Tax (8%): ${tax:.2f}")
+        print(f"Grand Total: ${total:.2f}")
+        print(f"Charging ${total:.2f} via {payment_method}...")
+        print("Payment successful! Order confirmed.")
+        
+        return {
+            "order_id": order_id,
+            "total_paid": total,
+            "status": "Success"
+        }
+
+# --- Demonstration of the Whole System ---
+if __name__ == "__main__":
+    # 1. Create available products
+    laptop = Item(item_id="PROD001", name="Developer Laptop", price=1299.99)
+    mouse = Item(item_id="PROD002", name="Wireless Mouse", price=49.99)
+
+    # 2. User populates their cart
+    user_cart = ShoppingCart()
+    user_cart.add_item(laptop, quantity=1)
+    user_cart.add_item(mouse, quantity=2)
+
+    # 3. Perform checkout execution
+    try:
+        receipt = CheckoutProcessor.process_checkout(user_cart, payment_method="Credit Card (Visa)")
+        print(f"\nFinal Receipt Status: {receipt['status']} | Transaction ID: {receipt['order_id']}")
+    except ValueError as e:
+        print(f"Checkout Failed: {e}")
