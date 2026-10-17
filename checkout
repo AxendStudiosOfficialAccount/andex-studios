@@ -1,0 +1,115 @@
+/**
+ * Core E-commerce Checkout Handler
+ * Manages cart state, tax calculations, and external payment links.
+ */
+
+// Global state for user checkout
+const CheckoutState = {
+    cartItems: [
+        { id: "PROD001", name: "Premium License", price: 49.99, quantity: 1 }
+    ],
+    salesTaxRate: 0.08, // 8% Sales Tax
+    discountAmount: 0.00
+};
+
+/**
+ * Calculates current subtotal, tax, and order totals
+ */
+function calculateOrderTotals() {
+    const subtotal = CheckoutState.cartItems.reduce((acc, item) => {
+        return acc + (item.price * item.quantity);
+    }, 0);
+
+    const taxableAmount = Math.max(0, subtotal - CheckoutState.discountAmount);
+    const tax = taxableAmount * CheckoutState.salesTaxRate;
+    const finalTotal = taxableAmount + tax;
+
+    return {
+        subtotal: subtotal.toFixed(2),
+        tax: tax.toFixed(2),
+        total: finalTotal.toFixed(2)
+    };
+}
+
+/**
+ * Updates the web page visual interface dynamically
+ */
+function renderCheckoutInterface() {
+    const totals = calculateOrderTotals();
+    
+    // Update elements if they exist on the DOM
+    const subtotalEl = document.getElementById("subtotal-display");
+    const taxEl = document.getElementById("tax-display");
+    const totalEl = document.getElementById("total-display");
+
+    if (subtotalEl) subtotalEl.innerText = `$${totals.subtotal}`;
+    if (taxEl) taxEl.innerText = `$${totals.tax}`;
+    if (totalEl) totalEl.innerText = `$${totals.total}`;
+}
+
+/**
+ * Handles the submission event and payment gateway routing
+ */
+function processSecureCheckout(event) {
+    event.preventDefault();
+    
+    const totals = calculateOrderTotals();
+    const customerEmail = document.getElementById("customer-email")?.value || "Guest";
+
+    console.log(`Initializing checkout session for ${customerEmail}...`);
+    console.log(`Amount due: $${totals.total}`);
+
+    // If using a pre-configured Payment Provider link or direct payment portal:
+    // Change this to your live payment gateway URL configuration
+    const stripePaymentGatewayUrl = `https://stripe.com{encodeURIComponent(customerEmail)}`;
+    
+    // Redirect user securely to complete checkout
+    window.location.href = stripePaymentGatewayUrl;
+}
+
+// Ensure the page updates elements when loaded
+document.addEventListener("DOMContentLoaded", () => {
+    renderCheckoutInterface();
+    
+    const form = document.getElementById("payment-form");
+    if (form) {
+        form.addEventListener("submit", processSecureCheckout);
+    }
+});
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Git Checkout System</title>
+    <style>
+        body { font-family: sans-serif; background: #fafafa; padding: 20px; text-align: center; }
+        .box { background: white; max-width: 400px; margin: auto; padding: 20px; border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .row { display: flex; justify-content: space-between; margin: 10px 0; }
+        input { width: 90%; padding: 8px; margin-bottom: 15px; }
+        button { background: #0070ba; color: white; width: 100%; border: none; padding: 12px; font-weight: bold; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+<div class="box">
+    <h3>Order Verification</h3>
+    
+    <div class="row"><span>Subtotal:</span> <span id="subtotal-display">$0.00</span></div>
+    <div class="row"><span>Estimated Tax:</span> <span id="tax-display">$0.00</span></div>
+    <hr>
+    <div class="row" style="font-weight: bold;"><span>Total:</span> <span id="total-display">$0.00</span></div>
+
+    <form id="payment-form" style="margin-top: 20px;">
+        <input type="email" id="customer-email" placeholder="Enter email address" required>
+        <button type="submit">Proceed to Secure Payment</button>
+    </form>
+</div>
+
+<!-- Load the custom logic script -->
+<script src="checkout.js"></script>
+</body>
+</html>
+git add checkout.js checkout.html
+git commit -m "feat: complete JavaScript checkout workflow implementation"
+git push origin main
