@@ -1,6 +1,8 @@
 
 import { useState } from 'react';
 import './App.css';
+import Checkout from './.vscode/Checkout.jsx'
+
 
 
 const products = [
@@ -61,7 +63,10 @@ const products = [
    {
   id: 7,
   name: "5V DC Motor",
+  category: "Motors",
   price: 15,
+  color: "Silver",
+  emoji: "⚙️",
   image: "https://media.istockphoto.com/id/958669244/photo/electromotor.jpg?s=1024x1024&w=is&k=20&c=t2jFJontbiM9b-PQ9BRa2APnyIs-jejRYHKWYFqwwXw=",
   description: "Compact 5V DC motor for DIY electronics and robotics."
 }
@@ -72,6 +77,7 @@ const categories = ['All', 'T-Shirts', 'Graphic Tees', 'Mugs', 'Motors'];
 
 function App() {
   const [category, setCategory] = useState('All');
+  const [checkoutOpen, setCheckoutOpen] = useState(false);
   const [cart, setCart] = useState([]);
   const [cartOpen,setCartOpen] = useState(false);
   const [search, setSearch] = useState('');
@@ -81,6 +87,15 @@ function App() {
     const matchesSearch = product.name.toLowerCase().includes(search.toLowerCase());
     return matchesCategory && matchesSearch;
   });
+
+  if (checkoutOpen) {
+    return (
+      <Checkout
+        cart={cart}
+        onBack={() => setCheckoutOpen(false)}
+      />
+    );
+  }
 
 
 const addToCart = (product) => {
@@ -140,7 +155,9 @@ const total = cart.reduce(
           <a href="#shop">Shop</a>
           <a href="#story">Our Story</a>
         </nav>
-        <a className="cart-link" href="#shop">Bag ({cart.length})</a>
+        <button className="cart-link" type="button" onClick={() => setCartOpen(true)}>
+          Bag ({cartCount})
+        </button>
       </header>
 
       <main>
@@ -194,7 +211,7 @@ const total = cart.reduce(
                   <div>
                     <h3>{product.name}</h3>
                     <p>
-                      {product.color} · {product.category}
+                      {product.color || 'Standard'} · {product.category}
                     </p>
                   </div>
                   <strong>${product.price}</strong>
@@ -250,10 +267,62 @@ const total = cart.reduce(
       {cart.length > 0 && (
         <div className="cart-notice" role="status">
           <span>
-            {cart.length} {cart.length === 1 ? 'item' : 'items'} in your bag
+            {cartCount} {cartCount === 1 ? 'item' : 'items'} in your bag
           </span>
-          <strong>Total: ${total}</strong>
-          <button onClick={() => setCart([])}>Clear bag</button>
+          <strong>Total: ${total.toFixed(2)}</strong>
+          <button type="button" onClick={() => setCartOpen(true)}>View bag</button>
+        </div>
+      )}
+
+      {cartOpen && (
+        <div className="cart-overlay" role="presentation" onClick={() => setCartOpen(false)}>
+          <section
+            className="cart-panel"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Shopping bag"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="cart-panel-heading">
+              <h2>Your bag ({cartCount})</h2>
+              <button type="button" onClick={() => setCartOpen(false)} aria-label="Close bag">×</button>
+            </div>
+
+            {cart.length === 0 ? (
+              <p>Your bag is empty.</p>
+            ) : (
+              <>
+                <ul className="cart-items">
+                  {cart.map((item) => (
+                    <li className="cart-item" key={item.id}>
+                      <div>
+                        <h3>{item.name}</h3>
+                        <p>${item.price.toFixed(2)} each</p>
+                        <button type="button" onClick={() => removeFromCart(item.id)}>Remove</button>
+                      </div>
+                      <div className="cart-quantity">
+                        <button type="button" onClick={() => changeQuantity(item.id, -1)} aria-label={`Decrease ${item.name} quantity`}>−</button>
+                        <span>{item.quantity}</span>
+                        <button type="button" onClick={() => changeQuantity(item.id, 1)} aria-label={`Increase ${item.name} quantity`}>+</button>
+                      </div>
+                      <strong>${(item.price * item.quantity).toFixed(2)}</strong>
+                    </li>
+                  ))}
+                </ul>
+                <div className="cart-total"><span>Subtotal</span><strong>${total.toFixed(2)}</strong></div>
+                <button
+                  className="button dark-button"
+                  type="button"
+                  onClick={() => {
+                    setCartOpen(false);
+                    setCheckoutOpen(true);
+                  }}
+                >
+                  CHECKOUT
+                </button>
+              </>
+            )}
+          </section>
         </div>
       )}
 
@@ -263,6 +332,5 @@ const total = cart.reduce(
     </div>
   );
 }
-
 export default App;
 
